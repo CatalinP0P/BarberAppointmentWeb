@@ -1,0 +1,204 @@
+﻿@model HomeIndexViewModel;
+
+<head>
+    <link href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+</head>
+
+
+
+<div class="container-fluid d-flex bg-image align-items-center"
+    style="background-image: url('https://pixabay.com/get/g1ae86ae5cfbddfe0f66ff2a891f074b3fbad4dfce56f02bc2174a6b818b8e9f0fd692dc81e5d1025fbde823d6916cf466de18b3ee67c71a1dfacfaf6973c770b51866a35f1bb160080b626a8c255299e_1920.jpg');">
+
+    <div class="col ms-5 text-white">
+        <h1 style=" font-family: 'Rockwell' ">Where Men Wants <br> To Look There Very Best.</h1>
+        <a class="btn btn-lg" style="background-color: #9f8c7c; color: White" href="#appointment"> Make Appointment
+        </a>
+    </div>
+
+</div>
+
+<div class="row pt-4" style="background-color: #232228;">
+    <div class="col" style="text-align: center">
+        <p class="mx-auto" style="color: White; font-family: 'Rockwell'; font-size: 70px"> Since 2005 </p>
+    </div>
+</div>
+
+<div class="row" style="background-color: #232228; padding-top: 10px" id="contact">
+    <div class="col-10 col-xl-6 mx-auto my-5" style="text-align: center">
+        <h4 class="mx-auto h4-contact" style="color: White; display: inline-block; position: relative"> Contact </h4>
+
+        <div class="container mx-auto text-center">
+            <iframe class="embed-responsive-item" style="justify-content: center;"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d171550.61629817466!2d22.67365858368438!3d47.7915618!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x473805b8b806354d%3A0x9e0f709b182e6213!2sVintage%20BarberShop!5e0!3m2!1sro!2sro!4v1675513004821!5m2!1sro!2sro"
+                width="100%" height="450px" allowfullscreen="" loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="row" style="background-color: #232228;">
+    <div class="col-10 col-xl-6 g-5 mx-auto " style="text-align : center" id="appointment">
+
+        <h4 class="mx-auto h4-appointment mt-2" style="color: White; display: inline-block; position: relative">
+            Appointment </h4>
+
+        <input class="form-control form-control-lg my-2" id="nameTextBox" placeholder="Name">
+
+        @Html.DropDownList("Select Month", new SelectList(@Model.MonthList.ToList()), "Select Month", new {
+        @class="form-control form-control-lg", id="monthList" } )
+
+        @Html.DropDownList("Select Day", new SelectList(@Model.MonthList.ToList()), "Select Day", new {
+        @class="form-control form-control-lg my-2", id="dayList" })
+
+<div class="form-group">
+    @Html.DropDownList("Select Hour", new SelectList(@Model.TimeSpans.ToList()), "Select Hour", new {@class =
+        "form-control form-control-lg", id="hourList"})
+
+</div>
+    
+        <a class="btn btn-lg my-4 mx-auto mb-5" id="submit" style="background-color: #9f8c7c; color: White;"> Make
+            Appointment </a>
+
+    </div>
+
+</div>
+
+
+<style>
+    .bg-image {
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-size: cover;
+        height: 650px;
+    }
+
+    h4 {
+        position: relative;
+        display: inline-block;
+    }
+
+    .h4-contact::before,
+    .h4-contact::after {
+        content: ' ';
+        display: block;
+        position: absolute;
+        top: 50%;
+        left: -260px;
+        width: 240px;
+        /* 100px line on either side */
+        border-bottom: 1px solid #FFF;
+    }
+
+    .h4-contact::after {
+        left: auto;
+        right: -260px;
+        /* make the "after" position on the right side of the h1 */
+    }
+
+    .h4-appointment::before,
+    .h4-appointment::after {
+        content: ' ';
+        display: block;
+        position: absolute;
+        top: 50%;
+        left: -235px;
+        width: 215px;
+        /* 100px line on either side */
+        border-bottom: 1px solid #FFF;
+    }
+
+    .h4-appointment::after {
+        left: auto;
+        right: -235px;
+        /* make the "after" position on the right side of the h1 */
+    }
+</style>
+
+
+@section scripts
+{
+<script>
+
+
+    $(document).ready(function () {
+        var monthList = $("#monthList");
+        var dayList = $("#dayList");
+        var hourList = $("#hourList");
+        var nameTextBox = $("#nameTextBox");
+        var MonthIndex = -1;
+
+
+        dayList.empty();
+        dayList.append("<option> Select Day </option>");
+
+        monthList.change(function () {
+            $.get("Api/Calendar/MonthIndex/" + monthList.val(), function (data) {
+
+                MonthIndex = data;
+                dayList.empty();
+
+                var url = "Api/Calendar/" + @Model.Year.Year + "/" + MonthIndex;
+                $.get(url, function (data) {
+                    $.each(data, function (day) {
+                        dayList.append("<option>" + data[day] + "</option>");
+                    });
+                });
+            });
+        });
+
+        hourList.change(function()
+        {
+            var time = hourList.val().split(':');
+            var url = "api/programari/" + dayList.val() + "/" + MonthIndex + "/" + @Model.Year.Year + "/" + time[0] + "/" + time[1]; 
+            $.get(url, function(data)
+            {
+                var response = String(data);
+                if ( response == "true" )  
+                {
+                    hourList.addClass("is-valid");
+                    hourList.removeClass("is-invalid");
+                }
+                else
+                {
+                    hourList.addClass("is-invalid");
+                    hourList.removeClass("is-valid");
+                }
+            })
+        })
+
+        
+
+        $("#submit").on("click", function () {
+            if (nameTextBox.val() == "") {
+                toastr.error("Name not added!");
+                return;
+            }
+            var hour = hourList.val();
+            var array = hour.split(':');
+
+            var parameters = dayList.val() + "/" + MonthIndex + "/" + @Model.Year.Year + "/" + array[0] + "/" + array[1];
+            var url = "Api/Programari/" + parameters;
+
+            $.get(url, function (data) {
+                var response = String(data);
+                if (response == "false") {
+                    toastr.error("Time not available for appointment");
+                }
+                if (response == "true") {
+                    toastr.success("Appointment Made with Success");
+                    url = ("Api/Programari/" + parameters + "/" + nameTextBox.val());
+                    $.post(url);
+                }
+
+            })
+
+
+        });
+
+    });
+</script>
+}
